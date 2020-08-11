@@ -1,7 +1,21 @@
+/**
+* 去除字符串中的非字符
+* @param str 需要去除非字符的字符串
+* @retrun { String } 去除结果
+* @example trim('1827391 82739127391827391231231231 ')
+*/
 const trim = str => {
     return str.replace(/\s/g, '')
 }
 
+/**
+* 大数加减
+* @param num1 { String | Number } 运算符左边的数字
+* @param num2 { String | Number } 运算符右边的数字
+* @param addOrSub { 'add' | 'sub' } 加法或减法
+* @retrun { String } 计算结果
+* @example bigNumberAddOrSub('182739182739127391827391231231231', '1', 'sub')
+*/
 const bigNumberAddOrSub = (num1, num2, addOrSub = 'add') => {
     num1 = trim('' + num1)
     num2 = trim('' + num2)
@@ -36,6 +50,7 @@ const bigNumberAddOrSub = (num1, num2, addOrSub = 'add') => {
 
     const integerLen = Math.max(num1Obj.integerArr.length, num2Obj.integerArr.length)
     const decimalLen = Math.max(num1Obj.decimalArr.length, num2Obj.decimalArr.length)
+    // tenPosition为加法进位
     let tenPosition = 0
 
     let decimalResArr = []
@@ -48,22 +63,30 @@ const bigNumberAddOrSub = (num1, num2, addOrSub = 'add') => {
             tenPosition = res >= 10 ? 1 : 0
         } else {
             res = Number(num1Obj.decimalArr[i] || 0) - Number(num2Obj.decimalArr[i] || 0)
-
+            // 如果结果小于0则借位
             if (res < 0) {
                 let jiewei = false
+                // 小数位借位
                 for (let j = i - 1; j >= 0 && !jiewei; j--) {
+                    // 如果该位大于0，则可以借位
                     jiewei = +num1Obj.decimalArr[j] > 0
                     if (jiewei) {
+                        // 被借位减一
                         num1Obj.decimalArr[j] = num1Obj.decimalArr[j] - 1
+                        // 被借位与减位之间的0改为9
                         for (let k = j + 1; k <= i; k++) {
                             num1Obj.decimalArr[k] = 9
                         }
                     }
                 }
+                // 整数位借位
                 for (let j = 0; j < integerLen && !jiewei; j++) {
+                    // 如果该位大于0，则可以借位
                     jiewei = +num1Obj.integerArr[j] > 0
                     if (jiewei) {
+                        // 被借位减一
                         num1Obj.integerArr[j] = num1Obj.integerArr[j] - 1
+                        // 被借位与减位之间的0改为9
                         for (let k = j - 1; k >= 0; k--) {
                             num1Obj.integerArr[k] = 9
                         }
@@ -72,11 +95,11 @@ const bigNumberAddOrSub = (num1, num2, addOrSub = 'add') => {
                         }
                     }
                 }
-
                 if (jiewei) {
+                    // 如果可以借位，则给当前位的计算结果加10
                     individualPosition = 10 + res
-                    tenPosition = -1
                 } else {
+                    // 无法借位则表示被减数小于减数，即a - b < 0 ，则计算b - a的结果后加上负号，a - b = - (b - a)
                     return ('-' + bigNumberAddOrSub(num2, num1, 'sub')).replace('--', '')
                 }
 
@@ -99,11 +122,16 @@ const bigNumberAddOrSub = (num1, num2, addOrSub = 'add') => {
         } else {
             res = Number(num1Obj.integerArr[i] || 0) - Number(num2Obj.integerArr[i] || 0)
 
+            // 如果结果小于0则借位
             if (res < 0) {
                 let jiewei = false
+                // 整数位借位
                 for (let j = i + 1; j < integerLen && !jiewei; j++) {
+                    // 如果该位大于0，则可以借位
                     jiewei = +num1Obj.integerArr[j] > 0
+                    // 被借位减一
                     num1Obj.integerArr[j] = num1Obj.integerArr[j] - 1
+                    // 被借位与减位之间的0改为9
                     if (jiewei) {
                         for (let k = j - 1; k > i; k--) {
                             num1Obj.integerArr[k] = 9
@@ -111,9 +139,10 @@ const bigNumberAddOrSub = (num1, num2, addOrSub = 'add') => {
                     }
                 }
                 if (jiewei) {
+                    // 如果可以借位，则给当前位的计算结果加10
                     individualPosition = 10 + res
-                    tenPosition = -1
                 } else {
+                    // 无法借位则表示被减数小于减数，即a - b < 0 ，则计算b - a的结果后加上负号，a - b = - (b - a)
                     return ('-' + bigNumberAddOrSub(num2, num1, 'sub')).replace('--', '')
                 }
             } else {
